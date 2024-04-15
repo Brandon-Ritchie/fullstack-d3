@@ -45,8 +45,8 @@ async function drawLineChart() {
 
     const wrapper = d3.select("#exercise")
         .append("svg")
-        .attr("width", dimensions.width)
-        .attr("height", dimensions.height);
+            .attr("width", dimensions.width)
+            .attr("height", dimensions.height);
 
     const bounds = wrapper.append("g")
         .style("transform", `translate(
