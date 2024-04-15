@@ -1,8 +1,7 @@
 import * as d3 from "d3";
-import csvFile from "../data/bob_ross_data.csv";
 
 async function drawLineChart() {
-    const csv = await d3.csv(csvFile);
+    const csv = await d3.csv("./data/bob_ross_data.csv");
 
     console.log(csv)
 

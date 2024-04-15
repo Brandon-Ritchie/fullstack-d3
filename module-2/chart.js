@@ -4,7 +4,7 @@ async function drawScatter() {
 
     // 1. Access data
 
-    const data = await d3.json("../data/my_weather_data.json")
+    const data = await d3.json("./data/my_weather_data.json")
 
     // 2. Create chart dimensions
 

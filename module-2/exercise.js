@@ -1,10 +1,9 @@
 import * as d3 from "d3";
-import tsvFile from "../data/penguins.tsv";
 
 async function drawScatter() {
     // 1. Access data
 
-    const data = await d3.tsv(tsvFile)
+    const data = await d3.tsv("./data/penguins.tsv")
 
     // 2. Create chart dimensions
 
