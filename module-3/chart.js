@@ -15,17 +15,16 @@ async function drawBars() {
         width,
         height: width * 0.6,
         margin: {
-        top: 30,
-        right: 10,
-        bottom: 50,
-        bottom: 50
-        }
+            top: 30,
+            right: 10,
+            bottom: 50,
+            left: 50
+        },
     }
 
-    dimensions.boundedWidth = dimensions.width 
-        - dimensions.margin.left 
-        - dimensions.margin.right;
-    dimensions.boundedHeight = dimensions.height 
+    dimensions.boundedWidth = dimensions.width
+        - dimensions.margin.left - dimensions.margin.right;
+    dimensions.boundedHeight = dimensions.height
         - dimensions.margin.top - dimensions.margin.bottom;
 
     // 3. Draw canvas
@@ -71,14 +70,11 @@ async function drawBars() {
 
     const barPadding = 1;
     const barRects = binGroups.append("rect")
-      .attr("x", d => xScale(d.x0) + barPadding / 2)
-      .attr("y", d => yScale(yAccessor(d)))
-      .attr("width", d => d3.max([0, xScale(d.x1) - xScale(d.x0) - barPadding]))
-      .attr("height", d => dimensions.boundedHeight - yScale(yAccessor(d)))
-      .attr("fill", "cornflowerblue")
-
-
-    // 6. Draw peripherals
+        .attr("x", d => xScale(d.x0) + barPadding / 2)
+        .attr("y", d => yScale(yAccessor(d)))
+        .attr("width", d => d3.max([0, xScale(d.x1) - xScale(d.x0) - barPadding]))
+        .attr("height", d => dimensions.boundedHeight - yScale(yAccessor(d)))
+        .attr("fill", "cornflowerblue")
 
 }
 drawBars()
