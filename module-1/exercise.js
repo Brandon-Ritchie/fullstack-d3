@@ -1,7 +1,10 @@
-  import * as d3 from "d3";
+import * as d3 from "d3";
+import csvFile from "../data/bob_ross_data.csv";
 
-  async function drawLineChart() {
-    const csv = await d3.csv("./data/stats1213.csv");
+async function drawLineChart() {
+    const csv = await d3.csv(csvFile);
+
+    console.log(csv)
 
     const groupedNumOfColorsPerSeason = [];
 
@@ -95,4 +98,4 @@
         .style("transform", `translateY(${dimensions.boundedHeight}px)`)
   }
 
-  drawLineChart()
+drawLineChart()
