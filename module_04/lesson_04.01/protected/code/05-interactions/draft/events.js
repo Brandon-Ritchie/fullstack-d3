@@ -19,6 +19,23 @@ async function createEvent() {
       .attr("fill", "lightgrey")
 
   // your code here
+  rects.on("mouseenter", (event, d) => {
+    const selection = d3.select(event.currentTarget)
+      .transition().duration(600)
+      .style("fill", d)
+  })
 
+  rects.on("mouseleave", (event) => {
+    const selection = d3.select(event.currentTarget)
+      .transition().duration(600)
+      .style("fill", "lightgrey")
+  })
+
+  setTimeout(() => {
+    console.log("removing events")
+    rects.dispatch("mouseleave")
+    rects.on("mouseenter", null)
+    rects.on("mouseleave", null)
+  }, 3_000)
 }
 createEvent()

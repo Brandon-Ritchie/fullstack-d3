@@ -128,6 +128,27 @@ async function drawBars() {
       .style("text-transform", "capitalize")
 
   // 7. Create interactions
+  const tooltip = d3.select("#tooltip")
+  binGroups.on("mouseenter", onMouseEnter).on("mouseleave", onMouseLeave)
 
+  function onMouseEnter(event, d) {
+    tooltip.select("#range").text([d.x0, d.x1].join(" - "))
+    tooltip.select("#count").text(d.length)
+    const x = xScale(d.x0) + barPadding / 2 + dimensions.margin.left + (xScale(d.x1) - xScale(d.x0)) / 2;
+    const y = yScale(yAccessor(d)) + dimensions.margin.top;
+
+    tooltip
+      .style("transform", `translate(
+        calc(-50% + 
+          ${x}px
+        ), calc(-100% +
+          ${y}px
+        ))`)
+      .style("opacity", 1)
+  }
+
+  function onMouseLeave() {
+    tooltip.style("opacity", 0)
+  }
 }
 drawBars()

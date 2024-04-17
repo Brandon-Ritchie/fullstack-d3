@@ -94,5 +94,62 @@ async function drawScatter() {
       .attr("x", -dimensions.boundedHeight / 2)
       .attr("y", -dimensions.margin.left + 10)
       .text("Relative humidity")
+
+  // 7. Set up interactions
+
+  const delaunay = d3.Delaunay.from(
+    dataset,
+    d => xScale(xAccessor(d)),
+    d => yScale(yAccessor(d)),
+  )
+  const voronoi = delaunay.voronoi()
+  voronoi.xmax = dimensions.boundedWidth
+  voronoi.ymax = dimensions.boundedHeight
+
+  bounds.selectAll(".voronoi")
+    .data(dataset)
+    .join("path")
+      .attr("class", "voronoi")
+      .attr("d", (d,i) => voronoi.renderCell(i))
+      .on("mouseenter", onMouseEnter)
+      .on("mouseleave", onMouseLeave)
+
+  const tooltip = d3.select("#tooltip")
+
+  function onMouseEnter(event, d) {
+    
+    
+    const dateParser = d3.timeParse("%Y-%m-%d")
+    const formatDate = d3.timeFormat("%B %A %-d, %Y")
+    const date = formatDate(dateParser(d.date))
+
+    tooltip.select("#date").text(date)
+    tooltip.select("#humidity").text(yAccessor(d))
+    tooltip.select("#dew-point").text(xAccessor(d))
+
+    const x = xScale(xAccessor(d)) + dimensions.margin.left;
+    const y = yScale(yAccessor(d)) + dimensions.margin.top;
+
+    tooltip.style("transform", `translate(
+        calc( -50% + ${x}px),
+        calc(-100% + ${y}px)
+      )`)
+      .style("opacity", 1)
+
+      const dayDot = bounds.append("circle")
+      .attr("class", "tooltip-dot")
+      .attr("cx", xScale(xAccessor(d)))
+      .attr("cy", yScale(yAccessor(d)))
+      .attr("r", 7)
+      .style("fill", "maroon")
+      .style("pointer-events", "none")
+  }
+
+  function onMouseLeave() {
+    tooltip.style("opacity", 0)
+    
+    d3.selectAll(".tooltip-dot")
+      .remove()
+  }
 }
 drawScatter()
