@@ -64,3 +64,15 @@ body {
     font-size: 1.1em;
     line-height: 1.4em;
 }
+
+.listener-rect {
+    fill: transparent;
+}
+
+.tooltip-circle {
+    stroke: #af9358;
+    fill: white;
+    stroke-width: 2;
+    opacity: 0;
+    pointer-events: none;
+}
