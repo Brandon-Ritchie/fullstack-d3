@@ -6,6 +6,15 @@ async function drawChart() {
 
   let dataset = await d3.json("./data/my_weather_data.json")
 
+  const temperatureMinAccessor = d => d.temperatureMin;
+  const temperatureMaxAccessor = d => d.temperatureMax;
+  const uvAccessor = d => d.uvIndex;
+  const precipitationProbabilityAccessor = d => d.precipProbability;
+  const precipitationTypeAccessor = d => d.precipType;
+  const cloudCoverAccessor = d => d.cloudCover;
+  const dateParser = d3.timeParse("%Y-%m-%d");
+  const dateAccessor = d => dateParser(d.date);
+
   // 2. Create chart dimensions
 
   const width = 600
@@ -36,6 +45,9 @@ async function drawChart() {
 
   // 4. Create scales
 
+  const angleScale = d3.scaleTime()
+    .domain(d3.extent(dataset, dateAccessor))
+    .range([0, Math.PI * 2]);
 
   // 5. Draw data
 

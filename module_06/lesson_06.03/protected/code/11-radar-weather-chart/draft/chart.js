@@ -9,7 +9,7 @@ async function drawChart() {
 
   const temperatureMinAccessor = d => d.temperatureMin
   const temperatureMaxAccessor = d => d.temperatureMax
-  const uvAccessor = d => d.uxIndex
+  const uvAccessor = d => d.uvIndex
   const precipitationProbabilityAccessor = d => d.precipProbability
   const precipitationTypeAccessor = d => d.precipType
   const cloudAccessor = d => d.cloudCover
@@ -132,6 +132,9 @@ async function drawChart() {
 
   // 5. Draw data
 
+  const freezingCircle = bounds.append("circle")
+    .attr("r", radiusScale(32))
+    .attr("class", "freezing-circle")
 
   // 7. Set up interactions
 

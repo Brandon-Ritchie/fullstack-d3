@@ -9,7 +9,7 @@ async function drawChart() {
 
   const temperatureMinAccessor = d => d.temperatureMin
   const temperatureMaxAccessor = d => d.temperatureMax
-  const uvAccessor = d => d.uxIndex
+  const uvAccessor = d => d.uvIndex
   const precipitationProbabilityAccessor = d => d.precipProbability
   const precipitationTypeAccessor = d => d.precipType
   const cloudAccessor = d => d.cloudCover
@@ -97,6 +97,16 @@ async function drawChart() {
     .domain(d3.extent(dataset, cloudAccessor))
     .range([1, 10])
 
+  const precipitationRadiusScale = d3.scaleSqrt()
+    .domain(d3.extent(dataset, precipitationProbabilityAccessor))
+    .range([0, 8])
+
+  const precipitationTypes = ["rain", "sleet", "snow"]
+  const precipitationTypeColorScale = d3.scaleOrdinal()
+    .domain(precipitationTypes)
+    .range(["#54a0ff", "#636e72", "#b2bec3"])
+
+
   // 6. Draw peripherals
 
   const peripherals = bounds.append("g")
@@ -178,15 +188,28 @@ async function drawChart() {
       .attr("y1", d => getYFromDataPoint(d, uvOffset))
       .attr("y2", d => getYFromDataPoint(d, uvOffset + 0.1))
 
-  const cloudGroup = bounds.append("g")
-  const cloudOffset = 1.27
-  const cloudDots = cloudGroup.selectAll("circle")
-    .data(dataset)
-    .join("circle")
-      .attr("class", "cloud-dot")
-      .attr("cx", d => getXFromDataPoint(d, cloudOffset))
-      .attr("cy", d => getYFromDataPoint(d, cloudOffset))
-      .attr("r", d => cloudRadiusScale(cloudAccessor(d)))
+    const cloudGroup = bounds.append("g")
+    const cloudOffset = 1.27
+    const cloudDots = cloudGroup.selectAll("circle")
+      .data(dataset)
+      .join("circle")
+        .attr("class", "cloud-dot")
+        .attr("cx", d => getXFromDataPoint(d, cloudOffset))
+        .attr("cy", d => getYFromDataPoint(d, cloudOffset))
+        .attr("r", d => cloudRadiusScale(cloudAccessor(d)))
+
+    const precipitationGroup = bounds.append("g")
+    const precipitationOffset = 1.14
+    const precipitationDots = precipitationGroup.selectAll("circle")
+      .data(dataset)
+      .join("circle")
+        .attr("cx", d => getXFromDataPoint(d, precipitationOffset))
+        .attr("cy", d => getYFromDataPoint(d, precipitationOffset))
+        .attr("r", d => precipitationRadiusScale(precipitationProbabilityAccessor(d)))
+        .style("fill", d => precipitationTypeColorScale(
+          precipitationTypeAccessor(d)
+        ))
+        .attr("class", "precipitation-dot")
 
   // 7. Set up interactions
 

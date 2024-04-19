@@ -9,7 +9,7 @@ async function drawChart() {
 
   const temperatureMinAccessor = d => d.temperatureMin
   const temperatureMaxAccessor = d => d.temperatureMax
-  const uvAccessor = d => d.uxIndex
+  const uvAccessor = d => d.uvIndex
   const precipitationProbabilityAccessor = d => d.precipProbability
   const precipitationTypeAccessor = d => d.precipType
   const cloudAccessor = d => d.cloudCover
@@ -92,6 +92,10 @@ async function drawChart() {
     )[1]
   )
 
+  const cloudRadiusScale = d3.scaleSqrt()
+    .domain(d3.extent(dataset, cloudAccessor))
+    .range([0, 10]);
+
   // 6. Draw peripherals
 
   const peripherals = bounds.append("g")
@@ -172,6 +176,16 @@ async function drawChart() {
       .attr("x2", d => getXFromDataPoint(d, uvOffset + 0.1))
       .attr("y1", d => getYFromDataPoint(d, uvOffset))
       .attr("y2", d => getYFromDataPoint(d, uvOffset + 0.1))
+
+  const cloudGroup = bounds.append("g")
+  const cloudOffset = 1.27;
+  const cloudDots = cloudGroup.selectAll("circle")
+    .data(dataset)
+    .join("circle")
+      .attr("class", "cloud-dot")
+      .attr("cx", d => getXFromDataPoint(d, cloudOffset))
+      .attr("cy", d => getYFromDataPoint(d, cloudOffset))
+      .attr("r", d => cloudRadiusScale(cloudAccessor(d)))
 
   // 7. Set up interactions
 

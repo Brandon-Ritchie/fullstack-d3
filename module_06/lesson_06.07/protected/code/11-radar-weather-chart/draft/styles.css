@@ -60,3 +60,7 @@ body {
     fill: #c8d6e5;
     opacity: 0.6;
 }
+
+.precipitation-dot {
+    opacity: 0.5;
+}

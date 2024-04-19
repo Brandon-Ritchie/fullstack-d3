@@ -55,3 +55,8 @@ body {
     stroke: #feca57;
    stroke-width: 2;
 }
+
+.cloud-dot {
+    fill: #c8d6e5;
+    opacity: 0.6;
+}

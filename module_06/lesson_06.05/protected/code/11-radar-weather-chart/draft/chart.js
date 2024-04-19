@@ -9,7 +9,7 @@ async function drawChart() {
 
   const temperatureMinAccessor = d => d.temperatureMin
   const temperatureMaxAccessor = d => d.temperatureMax
-  const uvAccessor = d => d.uxIndex
+  const uvAccessor = d => d.uvIndex
   const precipitationProbabilityAccessor = d => d.precipProbability
   const precipitationTypeAccessor = d => d.precipType
   const cloudAccessor = d => d.cloudCover
@@ -160,6 +160,19 @@ async function drawChart() {
   const area = bounds.append("path")
     .attr("d", areaGenerator(dataset))
     .style("fill", `url(#${gradientId})`)
+
+  const uvIndexThreshold = 8;
+  const uvGroup = bounds.append("g");
+  const uvOffset = 0.95;
+
+  const highUvDays = uvGroup.selectAll("lines")
+    .data(dataset.filter(d => uvAccessor(d) > uvIndexThreshold))
+    .join("line")
+      .attr("x1", d => getXFromDataPoint(d, uvOffset))
+      .attr("y1", d => getYFromDataPoint(d, uvOffset))
+      .attr("x2", d => getXFromDataPoint(d, uvOffset + 0.1))
+      .attr("y2", d => getYFromDataPoint(d, uvOffset + 0.1))
+      .attr("class", "uv-line")
 
   // 7. Set up interactions
 
