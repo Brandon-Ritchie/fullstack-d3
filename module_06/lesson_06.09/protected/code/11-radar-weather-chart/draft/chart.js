@@ -92,18 +92,23 @@ async function drawChart() {
     )[1]
   )
 
-  // make sure to use a sqrt scale for circle areas
   const cloudRadiusScale = d3.scaleSqrt()
-    .domain(d3.extent(dataset, cloudAccessor))
-    .range([1, 10])
+      .domain(d3.extent(dataset, cloudAccessor))
+      .range([1, 10])
 
   const precipitationRadiusScale = d3.scaleSqrt()
-    .domain(d3.extent(dataset, precipitationProbabilityAccessor))
-    .range([1, 8])
+      .domain(d3.extent(dataset, precipitationProbabilityAccessor))
+      .range([0, 8])
+      console.log(d3.extent(dataset, precipitationProbabilityAccessor))
   const precipitationTypes = ["rain", "sleet", "snow"]
   const precipitationTypeColorScale = d3.scaleOrdinal()
-    .domain(precipitationTypes)
-    .range(["#54a0ff", "#636e72", "#b2bec3"])
+      .domain(precipitationTypes)
+      .range(["#54a0ff", "#636e72", "#b2bec3"])
+
+  const temperatureColorScale = d3.scaleSequential()
+      .domain(radiusScale.domain())
+      .interpolator(gradientColorScale)
+
 
   // 6. Draw peripherals
 
@@ -168,7 +173,6 @@ async function drawChart() {
     .angle(d => angleScale(dateAccessor(d)))
     .innerRadius(d => radiusScale(temperatureMinAccessor(d)))
     .outerRadius(d => radiusScale(temperatureMaxAccessor(d)))
-  console.log(areaGenerator(dataset))
 
   const area = bounds.append("path")
     .attr("d", areaGenerator(dataset))
@@ -177,6 +181,7 @@ async function drawChart() {
   const uvIndexThreshold = 8
   const uvGroup = bounds.append("g")
   const uvOffset = 0.95
+
   const highUvDays = uvGroup.selectAll("line")
     .data(dataset.filter(d => uvAccessor(d) > uvIndexThreshold))
     .join("line")
@@ -191,25 +196,23 @@ async function drawChart() {
   const cloudDots = cloudGroup.selectAll("circle")
     .data(dataset)
     .join("circle")
-      .attr("class", "cloud-dot")
       .attr("cx", d => getXFromDataPoint(d, cloudOffset))
       .attr("cy", d => getYFromDataPoint(d, cloudOffset))
       .attr("r", d => cloudRadiusScale(cloudAccessor(d)))
+      .attr("class", "cloud-dot")
 
   const precipitationGroup = bounds.append("g")
   const precipitationOffset = 1.14
   const precipitationDots = precipitationGroup.selectAll("circle")
-    .data(dataset.filter(precipitationTypeAccessor))
+    .data(dataset)
     .join("circle")
-      .attr("class", "precipitation-dot")
       .attr("cx", d => getXFromDataPoint(d, precipitationOffset))
       .attr("cy", d => getYFromDataPoint(d, precipitationOffset))
-      .attr("r", d => precipitationRadiusScale(
-        precipitationProbabilityAccessor(d)
-      ))
+      .attr("r", d => precipitationRadiusScale(precipitationProbabilityAccessor(d)))
       .style("fill", d => precipitationTypeColorScale(
         precipitationTypeAccessor(d)
       ))
+      .attr("class", "precipitation-dot")
 
   // 6. Draw peripherals, part II
 
@@ -220,37 +223,31 @@ async function drawChart() {
     const [x2, y2] = getCoordinatesForAngle(angle, 1.6)
 
     annotationGroup.append("line")
-        .attr("class", "annotation-line")
         .attr("x1", x1)
         .attr("x2", x2)
         .attr("y1", y1)
         .attr("y2", y2)
+        .attr("class", "annotation-line")
 
     annotationGroup.append("text")
-        .attr("class", "annotation-text")
         .attr("x", x2 + 6)
         .attr("y", y2)
+        .attr("class", "annotation-text")
         .text(text)
   }
 
   drawAnnotation(Math.PI * 0.23, cloudOffset, "Cloud Cover")
   drawAnnotation(Math.PI * 0.26, precipitationOffset, "Precipitation")
 
-  drawAnnotation(Math.PI * 0.734, uvOffset + 0.05, `UV Index over ${
+  drawAnnotation(Math.PI * 0.734, uvOffset, `UV Index over ${
     uvIndexThreshold
   }`)
   drawAnnotation(Math.PI * 0.7, 0.5, "Temperature")
-  drawAnnotation(
-    Math.PI * 0.9,
-    radiusScale(32) / dimensions.boundedRadius,
-    "Freezing Temperatures"
-  )
+  drawAnnotation(Math.PI * 0.9, radiusScale(32) / dimensions.boundedRadius, "Freezing Tempreature")
 
   precipitationTypes.forEach((precipitationType, index) => {
-    const labelCoordinates = getCoordinatesForAngle(
-      Math.PI * 0.26,
-      1.6
-    )
+    const labelCoordinates = getCoordinatesForAngle(Math.PI * 0.26, 1.6)
+
     annotationGroup.append("circle")
         .attr("cx", labelCoordinates[0] + 15)
         .attr("cy", labelCoordinates[1] + (16 * (index + 1)))
@@ -258,14 +255,105 @@ async function drawChart() {
         .style("opacity", 0.7)
         .attr("fill", precipitationTypeColorScale(precipitationType))
     annotationGroup.append("text")
-        .attr("class", "annotation-text")
         .attr("x", labelCoordinates[0] + 25)
         .attr("y", labelCoordinates[1] + (16 * (index + 1)))
         .text(precipitationType)
+        .attr("class", "annotation-text")
+
   })
 
   // 7. Set up interactions
 
+  const listenerCircle = bounds.append("circle")
+      .attr("r", dimensions.width / 2)
+      .attr("class", "listener-circle")
+      .on("mousemove", onMouseMove)
+      .on("mouseleave", onMouseLeave)
+
+  const tooltip = d3.select("#tooltip")
+  const tooltipLine = bounds.append("path")
+    .attr("class", "tooltip-line")
+
+  function onMouseMove(e) {
+    const [x, y] = d3.pointer(e)
+
+    const getAngleFromCoordinates = (x, y) => (
+      Math.atan2(y, x)
+    )
+    let angle = getAngleFromCoordinates(x, y) + Math.PI / 2
+    if (angle < 0) angle = (Math.PI * 2) + angle
+
+    const tooltipArcGenerator = d3.arc()
+        .innerRadius(0)
+        .outerRadius(dimensions.boundedRadius * 1.6)
+        .startAngle(angle - 0.015)
+        .endAngle(angle + 0.015)
+
+    tooltipLine.attr("d", tooltipArcGenerator())
+        .style("opacity", 1)
+
+    const outerCoordinates = getCoordinatesForAngle(angle, 1.6)
+
+    tooltip.style("opacity", 1)
+        .style("transform", `translate(calc(${
+          outerCoordinates[0] < -50 ? "40px + -100" :
+          outerCoordinates[0] > 50 ? "-40px + 0" :
+          -50
+        }% + ${
+          outerCoordinates[0] + dimensions.margin.left + dimensions.boundedRadius
+        }px), calc(${
+          outerCoordinates[1] < -50 ? "40px + -100" :
+          outerCoordinates[1] > 50 ? "-40px + 0" :
+          -50
+        }% + ${
+          outerCoordinates[1] + dimensions.margin.top + dimensions.boundedRadius
+        }px))`)
+
+    const date = angleScale.invert(angle)
+    const dateString = d3.timeFormat("%Y-%m-%d")(date)
+    const dataPoint = dataset.find(d => d.date == dateString)
+    if (!dataPoint) return
+
+
+    tooltip.select("#tooltip-date")
+        .text(d3.timeFormat("%B %-d")(date))
+    tooltip.select("#tooltip-temperature-min")
+        .html(`${d3.format(".1f")(
+          temperatureMinAccessor(dataPoint))
+        }°F`)
+    tooltip.select("#tooltip-temperature-max")
+        .html(`${d3.format(".1f")(
+          temperatureMaxAccessor(dataPoint))
+        }°F`)
+    tooltip.select("#tooltip-uv")
+        .text(uvAccessor(dataPoint))
+    tooltip.select("#tooltip-cloud")
+        .text(cloudAccessor(dataPoint))
+    tooltip.select("#tooltip-precipitation")
+        .text(d3.format(".0%")(
+          precipitationProbabilityAccessor(dataPoint)
+        ))
+    tooltip.select("#tooltip-precipitation-type")
+        .text(precipitationTypeAccessor(dataPoint))
+    tooltip.select(".tooltip-precipitation-type")
+        .style("color", precipitationTypeAccessor(dataPoint)
+          ? precipitationTypeColorScale(
+              precipitationTypeAccessor(dataPoint)
+            )
+          : "#dadadd")
+    tooltip.select("#tooltip-temperature-min")
+        .style("color", temperatureColorScale(
+          temperatureMinAccessor(dataPoint)
+        ))
+    tooltip.select("#tooltip-temperature-max")
+        .style("color", temperatureColorScale(
+          temperatureMaxAccessor(dataPoint)
+        ))
+  }
+  function onMouseLeave() {
+    tooltipLine.style("opacity", 0)
+    tooltip.style("opacity", 0)
+  }
 
 }
 drawChart()

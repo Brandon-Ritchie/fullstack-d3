@@ -13,6 +13,10 @@ body {
     background: #f8f9fa;
 }
 
+svg {
+    overflow: visible;
+}
+
 .title {
     position: relative;
     width: 600px;
@@ -59,4 +63,15 @@ body {
 .cloud-dot {
     fill: #c8d6e5;
     opacity: 0.6;
+}
+
+.annotation-line {
+    stroke: #34495e;
+    opacity: 0.4;
+}
+
+.annotation-text {
+    fill: #34495e;
+    font-size: 0.7em;
+    dominant-baseline: middle;
 }

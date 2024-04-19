@@ -211,6 +211,51 @@ async function drawChart() {
         precipitationTypeAccessor(d)
       ))
 
+  // Draw peripherals pt 2
+
+  const annotationGroup = bounds.append("g")
+
+  const drawAnnotation = (angle, offset, text) => {
+    const [ x1, y1 ] = getCoordinatesForAngle(angle, offset);
+    const [ x2, y2 ] = getCoordinatesForAngle(angle, 1.6);
+
+    annotationGroup.append("line")
+      .attr("x1", x1)
+      .attr("x2", x2)
+      .attr("y1", y1)
+      .attr("y2", y2)
+      .attr("class", "annotation-line")
+
+      annotationGroup.append("text")
+      .attr("x", x2 + 6)
+      .attr("y", y2)
+      .attr("class", "annotation-text")
+      .text(text)
+  }
+
+  drawAnnotation(Math.PI * 0.23, cloudOffset, "Cloud Cover")
+  drawAnnotation(Math.PI * 0.26, precipitationOffset, "Precipitation")
+  drawAnnotation(Math.PI * 0.734, uvOffset, `UV Index over ${uvIndexThreshold}`)
+  drawAnnotation(Math.PI * 0.7, 0.5, "Temperature")
+  drawAnnotation(Math.PI * 0.9, radiusScale(32) / dimensions.boundedRadius, "Freezing Temperature")
+  
+  precipitationTypes.forEach((precipitationType, index) => {
+    const labelCoordinates = getCoordinatesForAngle(Math.PI * 0.26, 1.6)
+    
+    annotationGroup.append("circle")
+      .attr("cx", labelCoordinates[0] + 15)
+      .attr("cy", labelCoordinates[1] + 16 * (index + 1))
+      .attr("r", 4)
+      .attr("fill", precipitationTypeColorScale(precipitationType))
+      .style("opacity", 0.7)
+
+    annotationGroup.append("text")
+      .attr("x", labelCoordinates[0] + 25)
+      .attr("y", labelCoordinates[1] + 16 * (index + 1))
+      .attr("class", "annotation-text")
+      .text(precipitationType)
+  })
+
   // 7. Set up interactions
 
 
