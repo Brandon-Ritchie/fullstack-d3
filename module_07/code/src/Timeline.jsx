@@ -2,7 +2,7 @@ import * as d3 from "d3";
 import PropTypes from "prop-types";
 import React from "react";
 
-import Axis from "./Chart/Axis-naive";
+import Axis from "./Chart/Axis";
 import Chart from "./Chart/Chart";
 import Line from "./Chart/Line";
 import { accessorPropsType, useChartDimensions } from "./Chart/utils";
@@ -34,8 +34,8 @@ const Timeline = ({ data, xAccessor, yAccessor, label }) => {
           xAccessor={xAccessorScaled}
           yAccessor={yAccessorScale}
         />
-        <Axis dimension="x" scale={xScale} />
-        <Axis dimension="y" scale={yScale} />
+        <Axis dimension="x" scale={xScale} formatTick={formatDate} />
+        <Axis dimension="y" scale={yScale} label="Temperature" />
       </Chart>
     </div>
   );
